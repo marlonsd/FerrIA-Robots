@@ -206,6 +206,9 @@ class Player(pygame.sprite.Sprite):
                 self.gold += gold
                 print 'Got', gold, 'gold from mine', mine.id
 
+        if mine.gold == 0:
+            mine.kill()
+
     def releaseGold(self):
 
         gold = self.gold
