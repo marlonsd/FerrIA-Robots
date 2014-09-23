@@ -1,3 +1,8 @@
+"""
+Based on Paul Vincent Craven code
+http://simpson.edu/author/pcraven-2/
+"""
+
 import pygame
 import numpy as np
 
@@ -50,22 +55,6 @@ class Mine(pygame.sprite.Sprite):
             self.gold = 0
             return aux
 
-class Wall(pygame.sprite.Sprite):
-    """ Wall the player can run into. """
-    def __init__(self, x, y, width, height, color=BLUE):
-        """ Constructor for the wall that the player can run into. """
-        # Call the parent's constructor
-        pygame.sprite.Sprite.__init__(self)
-
-        # Make a blue wall, of the size specified in the parameters
-        self.image = pygame.Surface([width, height])
-        self.image.fill(color)
-
-        # Make our top-left corner the passed-in location.
-        self.rect = self.image.get_rect()
-        self.rect.y = y
-        self.rect.x = x
-
 class Base(pygame.sprite.Sprite):
 
     def __init__(self, x, y, width, height, color=RED, gold=0.):
@@ -93,8 +82,21 @@ class Base(pygame.sprite.Sprite):
 
         return gold
 
-    def inside(self, x, y):
-        inside_x = (x >= self.rect.x and x <= self.rect.x+self.width)
-        inside_y = (y >= self.rect.y and y <= self.rect.y+self.height)
+    def getBalance():
+        return self.gold
 
-        return (inside_x and inside_y)
+class Wall(pygame.sprite.Sprite):
+    """ Wall the player can run into. """
+    def __init__(self, x, y, width, height, color=BLUE):
+        """ Constructor for the wall that the player can run into. """
+        # Call the parent's constructor
+        pygame.sprite.Sprite.__init__(self)
+
+        # Make a blue wall, of the size specified in the parameters
+        self.image = pygame.Surface([width, height])
+        self.image.fill(color)
+
+        # Make our top-left corner the passed-in location.
+        self.rect = self.image.get_rect()
+        self.rect.y = y
+        self.rect.x = x

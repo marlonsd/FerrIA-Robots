@@ -4,7 +4,9 @@ http://simpson.edu/author/pcraven-2/
 """
 
 import pygame
+import argparse
 import numpy as np
+
 from objects import Base, Mine, Wall
 from player import Player
 
@@ -23,6 +25,20 @@ YELLOW   = ( 255,   255, 0)
 # Screen dimensions
 SCREEN_WIDTH  = 800
 SCREEN_HEIGHT = 600
+
+# Arguments
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-r","--robots", type=int, default=1,
+                    help="Number of robots that there will be in the game (default: 1).")
+
+parser.add_argument("-rs","--robotstrategy", choices=[1,2,3,4], default=1,
+                    help="Define robot strategy (default: 1).")
+
+parser.add_argument("-m","--mines", type=int, default=8,
+                    help="Number of mines that there will be in the game (default: 8).")
+
+args = parser.parse_args()
 
 # Call this function so the Pygame library can initialize itself
 pygame.init()
@@ -68,13 +84,12 @@ base_x = np.random.randint(10,SCREEN_WIDTH-60)
 base_y = np.random.randint(10,SCREEN_HEIGHT-60)
 
 base = Base(base_x, base_y, 50, 50, RED)
-# wall_list.add(wall)
 all_sprite_list.add(base)
 
 mines = []
 
 # Minas
-for i in range(8):
+for i in range(args.mines):
     mina_x = np.random.randint(10,SCREEN_WIDTH-35)
     mina_y = np.random.randint(10,SCREEN_HEIGHT-35)
 
@@ -91,12 +106,16 @@ for i in range(8):
     mines.append(mina)
 
     all_sprite_list.add(mina)
-print len(mines)
-# Create the player paddle object
-player = Player(10, 10, base, mines)
-player.walls = wall_list
+print len(mines), "mines created"
 
-all_sprite_list.add(player)
+# Create players objects
+players = []
+
+for i in range(args.robots):
+    player = Player(i, 10, 10, base, mines)
+    player.walls = wall_list
+    all_sprite_list.add(player)
+    players.append(player)
 
 clock = pygame.time.Clock()
 
@@ -106,14 +125,10 @@ while not done:
 
     for event in pygame.event.get():
 
-        # print player.rect.x, player.rect.y
-
         if event.type == pygame.QUIT:
             done = True
 
         elif event.type == pygame.KEYDOWN:
-
-            # print player.rect.x, player.rect.y
 
             if event.key == pygame.K_LEFT:
                 player.changespeed(-3, 0)
@@ -126,8 +141,6 @@ while not done:
 
         elif event.type == pygame.KEYUP:
 
-            # print player.rect.x, player.rect.y
-
             if event.key == pygame.K_LEFT:
                 player.changespeed(3, 0)
             elif event.key == pygame.K_RIGHT:
@@ -136,13 +149,6 @@ while not done:
                 player.changespeed(0, 3)
             elif event.key == pygame.K_DOWN:
                 player.changespeed(0, -3)
-
-    # if base.inside(player.rect.x, player.rect.y):
-    #     base.toDeposit(player)
-
-    # for pos, mine in enumerate(mines):
-    #     if mines[pos].inside(player.rect.x, player.rect.y):
-    #         player.storeGold(mines[pos])
 
     all_sprite_list.update()
 

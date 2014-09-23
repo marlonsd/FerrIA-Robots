@@ -1,3 +1,8 @@
+"""
+Based on Paul Vincent Craven code
+http://simpson.edu/author/pcraven-2/
+"""
+
 import pygame
 from objects import Base, Mine, Wall
 
@@ -19,7 +24,7 @@ class Player(pygame.sprite.Sprite):
     walls = None
 
     # Constructor function
-    def __init__(self, x, y, base, mines, capacity=100):
+    def __init__(self, id, x, y, base, mines, capacity=100):
         # Call the parent's constructor
         pygame.sprite.Sprite.__init__(self)
 
@@ -37,6 +42,8 @@ class Player(pygame.sprite.Sprite):
 
         self.base = base
         self.mines = mines
+
+        self.id = id
 
     def changespeed(self, x, y):
         """ Change the speed of the player. """
@@ -98,19 +105,7 @@ class Player(pygame.sprite.Sprite):
 
         return gold
 
-    # def releaseGold(self, gold):
-
-    #     if self.gold < gold:
-    #         self.gold = 0
-    #         return self.gold
-
-    #     self.gold-=gold
-
-    #     return self.gold
-
     def inside(self, obj):
-
-        # print obj.rect.x, obj.rect.y
 
         inside_x = (obj.rect.x <= self.rect.x and obj.rect.x+obj.rect.width >= self.rect.x)
         inside_y = (obj.rect.y <= self.rect.y and obj.rect.y+obj.rect.height >= self.rect.y)
