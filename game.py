@@ -75,9 +75,9 @@ wall = Wall(10, 590, 790, 10)
 wall_list.add(wall)
 all_sprite_list.add(wall)
 
-wall = Wall(10, 200, 100, 10)
-wall_list.add(wall)
-all_sprite_list.add(wall)
+# wall = Wall(10, 200, 100, 10)
+# wall_list.add(wall)
+# all_sprite_list.add(wall)
 
 # Base
 base_x = np.random.randint(10,SCREEN_WIDTH-60)
@@ -128,27 +128,89 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
 
-        elif event.type == pygame.KEYDOWN:
+        # elif event.type == pygame.KEYDOWN:
 
-            if event.key == pygame.K_LEFT:
-                player.changespeed(-3, 0)
-            elif event.key == pygame.K_RIGHT:
-                player.changespeed(3, 0)
-            elif event.key == pygame.K_UP:
-                player.changespeed(0, -3)
-            elif event.key == pygame.K_DOWN:
-                player.changespeed(0, 3)
+        #     if event.key == pygame.K_LEFT:
+        #         player.changespeed(-3, 0)
+        #     elif event.key == pygame.K_RIGHT:
+        #         player.changespeed(3, 0)
+        #     elif event.key == pygame.K_UP:
+        #         player.changespeed(0, -3)
+        #     elif event.key == pygame.K_DOWN:
+        #         player.changespeed(0, 3)
 
-        elif event.type == pygame.KEYUP:
+        # elif event.type == pygame.KEYUP:
 
-            if event.key == pygame.K_LEFT:
-                player.changespeed(3, 0)
-            elif event.key == pygame.K_RIGHT:
-                player.changespeed(-3, 0)
-            elif event.key == pygame.K_UP:
-                player.changespeed(0, 3)
-            elif event.key == pygame.K_DOWN:
-                player.changespeed(0, -3)
+        #     if event.key == pygame.K_LEFT:
+        #         player.changespeed(3, 0)
+        #     elif event.key == pygame.K_RIGHT:
+        #         player.changespeed(-3, 0)
+        #     elif event.key == pygame.K_UP:
+        #         player.changespeed(0, 3)
+        #     elif event.key == pygame.K_DOWN:
+        #         player.changespeed(0, -3)
+        
+    # print player.rect.x, player.rect.y
+
+    possibility = [(-1,-1),(0,-1),(1,-1),(-1,0),(1,0),(-1,1),(0,1),(1,1)]
+
+    if (player.rect.x <= 10 or player.rect.x < 0):
+        try:
+            possibility.remove((-1,-1))
+        except:
+            pass
+        try:
+            possibility.remove((-1,0))
+        except:
+            pass
+        try:
+            possibility.remove((-1,1))
+        except:
+            pass
+    elif (player.rect.x >= SCREEN_WIDTH-30):
+        try:
+            possibility.remove((1,-1))
+        except:
+            pass
+        try:
+            possibility.remove((1,0))
+        except:
+            pass
+        try:
+            possibility.remove((1,1))
+        except:
+            pass
+    if (player.rect.y <= 10 or player.rect.y < 0):
+        try:
+            possibility.remove((-1,-1))
+        except:
+            pass
+        try:
+            possibility.remove((0,-1))
+        except:
+            pass
+        try:
+            possibility.remove((1,-1))
+        except:
+            pass
+    elif (player.rect.y >= SCREEN_HEIGHT-30):
+        try:
+            possibility.remove((-1,1))
+        except:
+            pass
+        try:
+            possibility.remove((0,1))
+        except:
+            pass
+        try:
+            possibility.remove((1,1))
+        except:
+            pass
+
+    # print len(possibility)
+    op = np.random.randint(len(possibility))
+    player.changespeed(possibility[op][0],possibility[op][1])
+
 
     all_sprite_list.update()
 
