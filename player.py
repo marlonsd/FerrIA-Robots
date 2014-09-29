@@ -4,6 +4,7 @@ http://simpson.edu/author/pcraven-2/
 """
 
 import pygame
+import numpy as np
 from objects import Base, Mine, Wall
 
 # Colors
@@ -14,17 +15,23 @@ RED      = (   255,   0, 0)
 GREEN    = (   0,   255, 0)
 YELLOW   = ( 255,   255, 0)
 
+# Screen dimensions
+SCREEN_WIDTH  = 800
+SCREEN_HEIGHT = 600
+
 # This class represents the bar at the bottom that the player controls
 class Player(pygame.sprite.Sprite):
     """ This class represents the bar at the bottom that the player controls. """
 
-    # Set speed vector
-    change_x = 0
-    change_y = 0
-    walls = None
-
     # Constructor function
-    def __init__(self, id, x, y, base, mines, capacity=100):
+    def __init__(self, id, x, y, capacity=1):
+
+        # Set speed vector
+        self.change_x = 0
+        self.change_y = 0
+        self.walls = None
+
+
         # Call the parent's constructor
         pygame.sprite.Sprite.__init__(self)
 
@@ -39,9 +46,6 @@ class Player(pygame.sprite.Sprite):
 
         self.gold = 0
         self.capacity = capacity
-
-        self.base = base
-        self.mines = mines
 
         self.id = id
 
@@ -78,13 +82,13 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.rect.top = block.rect.bottom
 
-        if self.inside(self.base):
-            aux = self.base.toDeposit(self.gold)
-            self.gold-=aux
+        # if self.inside(self.base):
+        #     aux = self.base.toDeposit(self.gold)
+        #     self.gold-=aux
 
-        for mine in self.mines:
-            if self.inside(mine):
-                self.storeGold(mine)
+        # for mine in self.mines:
+        #     if self.inside(mine):
+        #         self.storeGold(mine)
 
     def storeGold(self, mine):
 
@@ -110,4 +114,64 @@ class Player(pygame.sprite.Sprite):
         inside_x = (obj.rect.x <= self.rect.x and obj.rect.x+obj.rect.width >= self.rect.x)
         inside_y = (obj.rect.y <= self.rect.y and obj.rect.y+obj.rect.height >= self.rect.y)
 
-        return (inside_x and inside_y)	
+        return (inside_x and inside_y)
+
+    def moviment(self):
+
+        possibility = [(-1,-1),(0,-1),(1,-1),(-1,0),(1,0),(-1,1),(0,1),(1,1)]
+
+        if (self.rect.x <= 10 or self.rect.x < 0):
+            try:
+                possibility.remove((-1,-1))
+            except:
+                pass
+            try:
+                possibility.remove((-1,0))
+            except:
+                pass
+            try:
+                possibility.remove((-1,1))
+            except:
+                pass
+        elif (self.rect.x >= SCREEN_WIDTH-30):
+            try:
+                possibility.remove((1,-1))
+            except:
+                pass
+            try:
+                possibility.remove((1,0))
+            except:
+                pass
+            try:
+                possibility.remove((1,1))
+            except:
+                pass
+        if (self.rect.y <= 10 or self.rect.y < 0):
+            try:
+                possibility.remove((-1,-1))
+            except:
+                pass
+            try:
+                possibility.remove((0,-1))
+            except:
+                pass
+            try:
+                possibility.remove((1,-1))
+            except:
+                pass
+        elif (self.rect.y >= SCREEN_HEIGHT-30):
+            try:
+                possibility.remove((-1,1))
+            except:
+                pass
+            try:
+                possibility.remove((0,1))
+            except:
+                pass
+            try:
+                possibility.remove((1,1))
+            except:
+                pass
+
+        mov_x, mov_y = possibility[np.random.randint(len(possibility))]
+        self.changespeed(mov_x,mov_y)

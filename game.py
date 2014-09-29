@@ -99,7 +99,7 @@ for i in range(args.mines):
     while (not (mina_y < base_y or mina_y > (base_y+50))):
         mina_y = np.random.randint(10,SCREEN_HEIGHT-35)
 
-    gold = np.random.randint(0,100)
+    gold = np.random.randint(1,10)
     mina = Mine(i, mina_x, mina_y, 25, 25, gold, YELLOW)
     print 'mine', i, mina_x, mina_y, gold
 
@@ -112,16 +112,25 @@ print len(mines), "mines created"
 players = []
 
 for i in range(args.robots):
-    player = Player(i, 10, 10, base, mines)
+    player_x = np.random.randint(10,SCREEN_WIDTH-35)
+    player_y = np.random.randint(10,SCREEN_HEIGHT-35)
+
+    player = Player(i, player_x, player_y, capacity=1)
     player.walls = wall_list
     all_sprite_list.add(player)
     players.append(player)
+    # wall_list.add(player)
 
 clock = pygame.time.Clock()
 
 done = False
 
 while not done:
+
+    for player in players:
+        # print player.rect.x, player.rect.y
+        wall_list.add(player)
+    # print
 
     for event in pygame.event.get():
 
@@ -149,68 +158,10 @@ while not done:
         #         player.changespeed(0, 3)
         #     elif event.key == pygame.K_DOWN:
         #         player.changespeed(0, -3)
-        
-    # print player.rect.x, player.rect.y
 
-    possibility = [(-1,-1),(0,-1),(1,-1),(-1,0),(1,0),(-1,1),(0,1),(1,1)]
-
-    if (player.rect.x <= 10 or player.rect.x < 0):
-        try:
-            possibility.remove((-1,-1))
-        except:
-            pass
-        try:
-            possibility.remove((-1,0))
-        except:
-            pass
-        try:
-            possibility.remove((-1,1))
-        except:
-            pass
-    elif (player.rect.x >= SCREEN_WIDTH-30):
-        try:
-            possibility.remove((1,-1))
-        except:
-            pass
-        try:
-            possibility.remove((1,0))
-        except:
-            pass
-        try:
-            possibility.remove((1,1))
-        except:
-            pass
-    if (player.rect.y <= 10 or player.rect.y < 0):
-        try:
-            possibility.remove((-1,-1))
-        except:
-            pass
-        try:
-            possibility.remove((0,-1))
-        except:
-            pass
-        try:
-            possibility.remove((1,-1))
-        except:
-            pass
-    elif (player.rect.y >= SCREEN_HEIGHT-30):
-        try:
-            possibility.remove((-1,1))
-        except:
-            pass
-        try:
-            possibility.remove((0,1))
-        except:
-            pass
-        try:
-            possibility.remove((1,1))
-        except:
-            pass
-
-    # print len(possibility)
-    op = np.random.randint(len(possibility))
-    player.changespeed(possibility[op][0],possibility[op][1])
-
+    for player in players:
+        wall_list.remove(player)
+        player.moviment()
 
     all_sprite_list.update()
 
