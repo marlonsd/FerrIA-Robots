@@ -26,6 +26,13 @@ YELLOW   = ( 255,   255, 0)
 SCREEN_WIDTH  = 800
 SCREEN_HEIGHT = 600
 
+def inside(player, obj):
+
+    inside_x = (obj.rect.x <= player.rect.x and obj.rect.x+obj.rect.width >= player.rect.x)
+    inside_y = (obj.rect.y <= player.rect.y and obj.rect.y+obj.rect.height >= player.rect.y)
+
+    return (inside_x and inside_y)
+
 # Arguments
 parser = argparse.ArgumentParser()
 
@@ -110,10 +117,12 @@ print len(mines), "mines created"
 
 # Create players objects
 players = []
+player_pos = []
 
 for i in range(args.robots):
     player_x = np.random.randint(10,SCREEN_WIDTH-35)
     player_y = np.random.randint(10,SCREEN_HEIGHT-35)
+    player_pos.append((player_x, player_y))
 
     player = Player(i, player_x, player_y, capacity=1)
     player.walls = wall_list
@@ -126,11 +135,6 @@ clock = pygame.time.Clock()
 done = False
 
 while not done:
-
-    for player in players:
-        # print player.rect.x, player.rect.y
-        wall_list.add(player)
-    # print
 
     for event in pygame.event.get():
 
@@ -160,8 +164,17 @@ while not done:
         #         player.changespeed(0, -3)
 
     for player in players:
-        wall_list.remove(player)
-        player.moviment()
+        # Checking base
+        if inside(player, base):
+            aux = base.toDeposit(player.releaseGold())
+
+        # Checking mines
+        for mine in mines:
+            if inside(player, mine):
+                player.storeGold(mine)
+                
+        # Moviment
+        player.moviment(player_pos)
 
     all_sprite_list.update()
 

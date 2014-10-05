@@ -3,7 +3,7 @@ Based on Paul Vincent Craven code
 http://simpson.edu/author/pcraven-2/
 """
 
-import pygame
+import pygame, abc
 import numpy as np
 from objects import Base, Mine, Wall
 
@@ -116,9 +116,17 @@ class Player(pygame.sprite.Sprite):
 
         return (inside_x and inside_y)
 
-    def moviment(self):
+    @abc.abstractmethod
+    def moviment(self, player_pos):
 
-        possibility = [(-1,-1),(0,-1),(1,-1),(-1,0),(1,0),(-1,1),(0,1),(1,1)]
+        def isIn(vector, point):
+            try:
+                index = vector[point]
+                return True
+            except:
+                return False
+
+        possibility = [(-1,-1),(0,-1),(1,-1),(-1,0),(0,0),(1,0),(-1,1),(0,1),(1,1)]
 
         if (self.rect.x <= 10 or self.rect.x < 0):
             try:
@@ -174,4 +182,15 @@ class Player(pygame.sprite.Sprite):
                 pass
 
         mov_x, mov_y = possibility[np.random.randint(len(possibility))]
+        new_pos = (player_pos[self.id][0]+mov_x, player_pos[self.id][1]+mov_y)
+
+        while isIn(player_pos, new_pos):
+            try:
+                possibility.remove((mov_x, mov_y))
+            except:
+                pass
+            mov_x, mov_y = possibility[np.random.randint(len(possibility))]
+            new_pos = (player_pos[self.id][0]+mov_x, player_pos[self.id][1]+mov_y)
+
         self.changespeed(mov_x,mov_y)
+        player_pos[self.id] = (new_pos)
