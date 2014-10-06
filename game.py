@@ -3,12 +3,14 @@ Based on Paul Vincent Craven code
 http://simpson.edu/author/pcraven-2/
 """
 
-import pygame
+import pygame, math, sys
 import argparse
 import numpy as np
 
 from objects import Base, Mine, Wall
-from player import Player
+from player import Player, Player2
+
+from collections import defaultdict
 
 """
 Global constants
@@ -46,6 +48,23 @@ parser.add_argument("-m","--mines", type=int, default=8,
                     help="Number of mines that there will be in the game (default: 8).")
 
 args = parser.parse_args()
+
+# Gradient Initialization
+gradient_mine = []
+for i in range(args.mines):
+    gradient_mine.append(0)
+
+gradient = []
+
+for i in range(SCREEN_WIDTH):
+    gradient_aux = []
+    for j in range(SCREEN_HEIGHT):
+        # aux = defaultdict(base=0, mines=gradient_mine)
+        aux = defaultdict(int)
+        aux['base'] = 0
+        aux['mines'] = gradient_mine
+        gradient_aux.append(aux)
+    gradient.append(gradient_aux)
 
 # Call this function so the Pygame library can initialize itself
 pygame.init()
@@ -93,6 +112,11 @@ base_y = np.random.randint(10,SCREEN_HEIGHT-60)
 base = Base(base_x, base_y, 50, 50, RED)
 all_sprite_list.add(base)
 
+# gradient = spread_base(gradient, base_x, base_y)
+for i in range(SCREEN_WIDTH):
+    for j in range(SCREEN_HEIGHT):
+        gradient[i][j]['base'] = math.sqrt(math.pow((base_x-i),2) + math.pow((base_y-j),2))
+
 mines = []
 
 # Minas
@@ -124,7 +148,7 @@ for i in range(args.robots):
     player_y = np.random.randint(10,SCREEN_HEIGHT-35)
     player_pos.append((player_x, player_y))
 
-    player = Player(i, player_x, player_y, capacity=1)
+    player = Player2(i, player_x, player_y, capacity=1)
     player.walls = wall_list
     all_sprite_list.add(player)
     players.append(player)
@@ -133,6 +157,11 @@ for i in range(args.robots):
 clock = pygame.time.Clock()
 
 done = False
+
+# print base_x, base_y, gradient[base_x][base_y]
+# print base_x-1, base_y, gradient[base_x-1][base_y]
+# print base_x-1, base_y-1, gradient[base_x-1][base_y-1]
+# print base_x-2, base_y-2, gradient[base_x-2][base_y-2]
 
 while not done:
 
@@ -174,7 +203,7 @@ while not done:
                 player.storeGold(mine)
                 
         # Moviment
-        player.moviment(player_pos)
+        player.moviment(player_pos, gradient)
 
     all_sprite_list.update()
 
