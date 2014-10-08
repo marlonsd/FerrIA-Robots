@@ -44,12 +44,12 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = y
         self.rect.x = x
 
-        self.gold = 1
+        self.gold = 0
         self.capacity = capacity
 
         self.id = id
 
-    def changespeed(self, x, y):
+    def changespeed2(self, x, y):
         """ Change the speed of the player. """
         self.change_x += x
         self.change_y += y
@@ -192,7 +192,7 @@ class Player(pygame.sprite.Sprite):
             mov_x, mov_y = possibility[np.random.randint(len(possibility))]
             new_pos = (player_pos[self.id][0]+mov_x, player_pos[self.id][1]+mov_y)
 
-        self.changespeed(mov_x,mov_y)
+        self.changespeed2(mov_x,mov_y)
         player_pos[self.id] = (new_pos)
 
 class Player2(Player):
@@ -203,7 +203,6 @@ class Player2(Player):
     def changespeed(self, x, y):
         self.change_x = x
         self.change_y = y
-
     def moviment(self, player_pos, gradient):
 
         if self.gold:
@@ -224,9 +223,10 @@ class Player2(Player):
             # print
 
         else:
-            print 'AQUI'
-            Player.moviment(self, player_pos, gradient)
+            #print 'AQUI'
+            Player.moviment(self,player_pos, gradient)
 
+    
     # def update(self):
     #     """ Update the player position. """
     #     # Move left/right

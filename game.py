@@ -7,6 +7,8 @@ import pygame, math, sys
 import argparse
 import numpy as np
 
+#from time import time
+
 from objects import Base, Mine, Wall
 from player import Player, Player2
 
@@ -162,7 +164,7 @@ done = False
 # print base_x-1, base_y, gradient[base_x-1][base_y]
 # print base_x-1, base_y-1, gradient[base_x-1][base_y-1]
 # print base_x-2, base_y-2, gradient[base_x-2][base_y-2]
-
+#t0 = time() #Contador de tempo
 while not done:
 
     for event in pygame.event.get():
@@ -204,7 +206,7 @@ while not done:
                 
         # Moviment
         player.moviment(player_pos, gradient)
-
+   
     all_sprite_list.update()
 
     screen.fill(BLACK)
@@ -214,5 +216,5 @@ while not done:
     pygame.display.flip()
 
     clock.tick(60)
-
+#duracao = time()-t0 # duração final
 pygame.quit()
