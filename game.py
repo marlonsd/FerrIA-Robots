@@ -7,10 +7,10 @@ import pygame, math, sys
 import argparse
 import numpy as np
 
-#from time import time
+from time import time
 
 from objects import Base, Mine, Wall
-from player import Player, Player2
+from player import Player, Player2, Player3, Player4
 
 from collections import defaultdict
 
@@ -43,13 +43,19 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-r","--robots", type=int, default=1,
                     help="Number of robots that there will be in the game (default: 1).")
 
-parser.add_argument("-rs","--robotstrategy", choices=[1,2,3,4], default=1,
+parser.add_argument("-rs","--robotstrategy", choices=['1','2','3','4'], default=1,
                     help="Define robot strategy (default: 1).")
 
 parser.add_argument("-m","--mines", type=int, default=8,
                     help="Number of mines that there will be in the game (default: 8).")
 
 args = parser.parse_args()
+
+print 'Robots game'
+print '\t'+str(args.robots)+' Robots, Strategy '+str(args.robotstrategy)+', '+str(args.mines)+' Mines.'
+print
+
+t0 = time()
 
 # Gradient Initialization
 gradient_mine = []
@@ -64,7 +70,7 @@ for i in range(SCREEN_WIDTH):
         # aux = defaultdict(base=0, mines=gradient_mine)
         aux = defaultdict(int)
         aux['base'] = 0
-        aux['mines'] = gradient_mine
+        aux['mines'] = 0
         gradient_aux.append(aux)
     gradient.append(gradient_aux)
 
@@ -102,10 +108,6 @@ all_sprite_list.add(wall)
 wall = Wall(10, 590, 790, 10)
 wall_list.add(wall)
 all_sprite_list.add(wall)
-
-# wall = Wall(10, 200, 100, 10)
-# wall_list.add(wall)
-# all_sprite_list.add(wall)
 
 # Base
 base_x = np.random.randint(10,SCREEN_WIDTH-60)
@@ -149,8 +151,10 @@ for i in range(args.robots):
     player_x = np.random.randint(10,SCREEN_WIDTH-35)
     player_y = np.random.randint(10,SCREEN_HEIGHT-35)
     player_pos.append((player_x, player_y))
-
-    player = Player2(i, player_x, player_y, capacity=1)
+    strategy = eval('Player'+str(args.robotstrategy))
+    
+    player = strategy(i, player_x, player_y, capacity=1)
+    
     player.walls = wall_list
     all_sprite_list.add(player)
     players.append(player)
@@ -160,16 +164,15 @@ clock = pygame.time.Clock()
 
 done = False
 
-# print base_x, base_y, gradient[base_x][base_y]
-# print base_x-1, base_y, gradient[base_x-1][base_y]
-# print base_x-1, base_y-1, gradient[base_x-1][base_y-1]
-# print base_x-2, base_y-2, gradient[base_x-2][base_y-2]
-#t0 = time() #Contador de tempo
+i = 0
 while not done:
-
+    i+=1
     for event in pygame.event.get():
 
         if event.type == pygame.QUIT:
+            duration = time() - t0
+            print 'duration:', duration, 's'
+            print
             done = True
 
         # elif event.type == pygame.KEYDOWN:
@@ -194,7 +197,10 @@ while not done:
         #     elif event.key == pygame.K_DOWN:
         #         player.changespeed(0, -3)
 
+    cond = True
+
     for player in players:
+
         # Checking base
         if inside(player, base):
             aux = base.toDeposit(player.releaseGold())
@@ -203,9 +209,23 @@ while not done:
         for mine in mines:
             if inside(player, mine):
                 player.storeGold(mine)
-                
+                if not mine.gold:
+                    mines.remove(mine)
+        
+
+        # Game ending
+        cond = cond and not player.gold
+
         # Moviment
         player.moviment(player_pos, gradient)
+
+    if cond and not len(mines):
+        duration = time() - t0
+        print 'duration:', duration, 's'
+        print i, 'ciclos'
+        done = True
+
+
    
     all_sprite_list.update()
 
@@ -216,5 +236,7 @@ while not done:
     pygame.display.flip()
 
     clock.tick(60)
-#duracao = time()-t0 # duração final
+
 pygame.quit()
+print '___________________________________________________________________________'
+print

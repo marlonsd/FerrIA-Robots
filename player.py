@@ -49,7 +49,7 @@ class Player(pygame.sprite.Sprite):
 
         self.id = id
 
-    def changespeed2(self, x, y):
+    def changespeed(self, x, y):
         """ Change the speed of the player. """
         self.change_x += x
         self.change_y += y
@@ -58,6 +58,8 @@ class Player(pygame.sprite.Sprite):
         """ Update the player position. """
         # Move left/right
         self.rect.x += self.change_x
+        if self.rect.x >= SCREEN_WIDTH:
+            self.rect.x -= self.change_x
 
         # Did this update cause us to hit a wall?
         block_hit_list = pygame.sprite.spritecollide(self, self.walls, False)
@@ -72,6 +74,9 @@ class Player(pygame.sprite.Sprite):
         # Move up/down
         self.rect.y += self.change_y
 
+        if self.rect.y >= SCREEN_HEIGHT:
+            self.rect.y -= self.change_y
+
         # Check and see if we hit anything
         block_hit_list = pygame.sprite.spritecollide(self, self.walls, False)
         for block in block_hit_list:
@@ -81,14 +86,6 @@ class Player(pygame.sprite.Sprite):
                 self.rect.bottom = block.rect.top
             else:
                 self.rect.top = block.rect.bottom
-
-        # if self.inside(self.base):
-        #     aux = self.base.toDeposit(self.gold)
-        #     self.gold-=aux
-
-        # for mine in self.mines:
-        #     if self.inside(mine):
-        #         self.storeGold(mine)
 
     def storeGold(self, mine):
 
@@ -116,16 +113,15 @@ class Player(pygame.sprite.Sprite):
 
         return (inside_x and inside_y)
 
+    def _isIn(self,vector, point):
+        try:
+            index = vector[point]
+            return True
+        except:
+            return False
+
     @abc.abstractmethod
     def moviment(self, player_pos, gradient):
-
-        def isIn(vector, point):
-            try:
-                index = vector[point]
-                return True
-            except:
-                return False
-
         possibility = [(-1,-1),(0,-1),(1,-1),(-1,0),(0,0),(1,0),(-1,1),(0,1),(1,1)]
 
         if (self.rect.x <= 10 or self.rect.x < 0):
@@ -184,7 +180,7 @@ class Player(pygame.sprite.Sprite):
         mov_x, mov_y = possibility[np.random.randint(len(possibility))]
         new_pos = (player_pos[self.id][0]+mov_x, player_pos[self.id][1]+mov_y)
 
-        while isIn(player_pos, new_pos):
+        while self._isIn(player_pos, new_pos):
             try:
                 possibility.remove((mov_x, mov_y))
             except:
@@ -192,7 +188,7 @@ class Player(pygame.sprite.Sprite):
             mov_x, mov_y = possibility[np.random.randint(len(possibility))]
             new_pos = (player_pos[self.id][0]+mov_x, player_pos[self.id][1]+mov_y)
 
-        self.changespeed2(mov_x,mov_y)
+        Player.changespeed(self, mov_x,mov_y)
         player_pos[self.id] = (new_pos)
 
 class Player2(Player):
@@ -203,63 +199,142 @@ class Player2(Player):
     def changespeed(self, x, y):
         self.change_x = x
         self.change_y = y
+
     def moviment(self, player_pos, gradient):
 
         if self.gold:
+
             possibility = [(-1,-1),(0,-1),(1,-1),(-1,0),(1,0),(-1,1),(0,1),(1,1)]
 
-            poss = [gradient[self.rect.x-1][self.rect.y-1]['base'], gradient[self.rect.x+0][self.rect.y-1]['base'], gradient[self.rect.x+1][self.rect.y-1]['base'], gradient[self.rect.x-1][self.rect.y]['base'], gradient[self.rect.x+1][self.rect.y]['base'], gradient[self.rect.x-1][self.rect.y+1]['base'], gradient[self.rect.x+0][self.rect.y+1]['base'], gradient[self.rect.x+1][self.rect.y+1]['base']]
+            for x, y in possibility:
+                try:
+                    aux = gradient[self.rect.x+x][self.rect.y+y]['base']
+                except:
+                    possibility.remove((x,y))
+
+            poss = []
+
+            for x, y in possibility:
+                poss.append(gradient[self.rect.x+x][self.rect.y+y]['base'])
+
             pos = np.argsort(poss)[0]
 
             mov_x, mov_y = possibility[pos]
-            new_pos = (player_pos[self.id][0]+mov_x, player_pos[self.id][1]+mov_y)
+            new_pos = (self.rect.x+mov_x, self.rect.y+mov_y)
 
-            self.changespeed(mov_x,mov_y)
+            Player2.changespeed(self,mov_x,mov_y)
             player_pos[self.id] = (new_pos)
 
-            # print self.rect.x, self.rect.y, mov_x, mov_y
-            # print poss, pos
-            # print new_pos
-            # print
-
         else:
-            #print 'AQUI'
             Player.moviment(self,player_pos, gradient)
 
-    
-    # def update(self):
-    #     """ Update the player position. """
-    #     # Move left/right
-    #     # self.rect.x += self.change_x
+class Player3(Player2):
 
-    #     # Did this update cause us to hit a wall?
-    #     block_hit_list = pygame.sprite.spritecollide(self, self.walls, False)
-    #     for block in block_hit_list:
-    #         # If we are moving right, set our right side to the left side of the item we hit
-    #         if self.change_x > 0:
-    #             self.rect.right = block.rect.left
-    #         else:
-    #             # Otherwise if we are moving left, do the opposite.
-    #             self.rect.left = block.rect.right
+    def __init__(self, id, x, y, capacity=1):
+        Player2.__init__(self, id, x, y, capacity)
+        self.xixi = 1
+        self.mark = False
 
-    #     # Move up/down
-    #     # self.rect.y += self.change_y
+    def storeGold(self, mine):
+        self.xixi = 1
+        Player.storeGold(self, mine)
 
-    #     # Check and see if we hit anything
-    #     block_hit_list = pygame.sprite.spritecollide(self, self.walls, False)
-    #     for block in block_hit_list:
+    def releaseGold(self):
+        self.mark = False
+        self.xixi = 1
 
-    #         # Reset our position based on the top/bottom of the object.
-    #         if self.change_y > 0:
-    #             self.rect.bottom = block.rect.top
-    #         else:
-    #             self.rect.top = block.rect.bottom
+        return Player.releaseGold(self)
 
-    #     # if self.inside(self.base):
-    #     #     aux = self.base.toDeposit(self.gold)
-    #     #     self.gold-=aux
+    def moviment(self, player_pos, gradient):
 
-    #     # for mine in self.mines:
-    #     #     if self.inside(mine):
-    #     #         self.storeGold(mine)
+        if self.gold:
+            if (gradient[self.rect.x][self.rect.y]['base'] != 100):
+                gradient[self.rect.x][self.rect.y]['mine'] += self.xixi
+                self.xixi += 1
+            Player2.moviment(self, player_pos, gradient)
+        else:
+            possible_neighbor = [(-1,-1),(0,-1),(1,-1),(0,0),(-1,0),(1,0),(-1,1),(0,1),(1,1)]
 
+            for x, y in possible_neighbor:
+                try:
+                    aux = gradient[self.rect.x+x][self.rect.y+y]['base']
+                except:
+                    possible_neighbor.remove((x,y))
+
+            possibility = []
+
+            for pos, neighbor in enumerate(possible_neighbor):
+                if gradient[self.rect.x+neighbor[0]][self.rect.y+neighbor[1]]['mine']:
+                    possibility.append([gradient[self.rect.x+neighbor[0]][self.rect.y+neighbor[1]]['mine'], pos])
+
+            if len(possibility):
+                pos = np.argsort(possibility, axis=0)[0][0]
+                mov_x, mov_y = possible_neighbor[possibility[pos][1]]
+                if mov_x == 0 and mov_y == 0:
+                    Player.moviment(self,player_pos, gradient)
+                else:
+                    new_pos = (self.rect.x+mov_x, self.rect.y+mov_y)
+
+                    while self._isIn(player_pos, new_pos):
+                        try:
+                            possibility.remove((mov_x, mov_y))
+                        except:
+                            pass
+                        mov_x, mov_y = possibility[np.random.randint(len(possibility))]
+                        new_pos = (self.rect.x+mov_x, self.rect.y+mov_y)
+
+                    Player2.changespeed(self, mov_x,mov_y)
+                    player_pos[self.id] = (new_pos)
+            else:
+                Player.moviment(self,player_pos, gradient)
+
+class Player4(Player3):
+
+    def __init__(self, id, x, y, capacity=1):
+        Player3.__init__(self, id, x, y, capacity=1)
+        # self.gold = 1
+
+    def moviment(self, player_pos, gradient):
+
+        if self.gold:
+            if (gradient[self.rect.x][self.rect.y]['base'] != 100):
+                gradient[self.rect.x][self.rect.y]['mine'] += self.xixi
+                self.xixi += 1
+            Player2.moviment(self, player_pos, gradient)
+        else:
+            possible_neighbor = [(-1,-1),(0,-1),(1,-1),(0,0),(-1,0),(1,0),(-1,1),(0,1),(1,1)]
+
+            for x, y in possible_neighbor:
+                try:
+                    aux = gradient[self.rect.x+x][self.rect.y+y]['base']
+                except:
+                    possible_neighbor.remove((x,y))
+
+            possibility = []
+
+            for pos, neighbor in enumerate(possible_neighbor):
+                if gradient[self.rect.x+neighbor[0]][self.rect.y+neighbor[1]]['mine']:
+                    possibility.append([gradient[self.rect.x+neighbor[0]][self.rect.y+neighbor[1]]['mine'], pos])
+
+            if len(possibility):
+                pos = np.argsort(possibility, axis=0)[0][0]
+                mov_x, mov_y = possible_neighbor[possibility[pos][1]]
+                if mov_x == 0 and mov_y == 0:
+                    gradient[self.rect.x][self.rect.y]['mine'] = 0
+                    Player.moviment(self,player_pos,gradient)
+                else:
+                    new_pos = (self.rect.x+mov_x, self.rect.y+mov_y)
+
+                    while self._isIn(player_pos, new_pos):
+                        try:
+                            possibility.remove((mov_x, mov_y))
+                        except:
+                            pass
+                        mov_x, mov_y = possibility[np.random.randint(len(possibility))]
+                        new_pos = (self.rect.x+mov_x, self.rect.y+mov_y)
+
+                    gradient[new_pos[0]][new_pos[1]]['mine'] = 0
+                    Player2.changespeed(self, mov_x,mov_y)
+                    player_pos[self.id] = (new_pos)
+            else:
+                Player.moviment(self,player_pos, gradient)    
