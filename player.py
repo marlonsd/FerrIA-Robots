@@ -191,6 +191,11 @@ class Player(pygame.sprite.Sprite):
         Player.changespeed(self, mov_x,mov_y)
         player_pos[self.id] = (new_pos)
 
+class Player1(Player):
+
+    def __init__(self, id, x, y, capacity=1):
+        Player.__init__(self, id, x, y, capacity=1)
+
 class Player2(Player):
 
     def __init__(self, id, x, y, capacity=1):

@@ -10,7 +10,7 @@ import numpy as np
 from time import time
 
 from objects import Base, Mine, Wall
-from player import Player, Player2, Player3, Player4
+from player import Player1, Player2, Player3, Player4
 
 from collections import defaultdict
 
